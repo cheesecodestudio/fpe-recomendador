@@ -2,7 +2,7 @@ import "./styles.css";
 
 /* ─── DUMMY MODE ─────────────────────────────────────────────── */
 // Cambia a false para usar el backend real
-const DUMMY_MODE = true;
+const DUMMY_MODE = false;
 
 const DUMMY_RESPONSE = {
   resumen: "Se han encontrado opciones de estudio que se ajustan a tus intereses y objetivos.",
