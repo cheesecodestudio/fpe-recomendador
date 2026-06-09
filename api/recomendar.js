@@ -41,7 +41,7 @@ function loadCareers() {
     "data",
     "fpe_carreras_costa_rica_2026.csv",
   );
-  const csv = fs.readFileSync(csvPath, "utf8");
+  const csv = fs.readFileSync(csvPath, "utf8").replace(/^\uFEFF/, "");
   return parse(csv, { columns: true, skip_empty_lines: true, trim: true });
 }
 
