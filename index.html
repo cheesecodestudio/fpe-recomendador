@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1d4ed8" />
+    <title>Recomendador FPE Costa Rica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- HERO -->
+      <header class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            Fondo Perpetuo para la Educacion
+          </div>
+          <h1>Encuentra tu opcion de estudio</h1>
+          <p>Responde unas preguntas y te mostramos hasta 3 programas aprobados por el FPE que podrian encajar contigo.</p>
+        </div>
+      </header>
+
+      <!-- FORM CARD -->
+      <main class="container">
+        <section class="form-card">
+          <form id="recomendador-form" novalidate>
+
+            <!-- PASO 1 -->
+            <div class="form-section">
+              <div class="section-label">
+                <span class="step-chip">1</span>
+                <span>Tu situacion</span>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="situacion_actual">Situacion actual</label>
+                <div class="select-wrap">
+                  <select id="situacion_actual" name="situacion_actual" required></select>
+                  <svg class="select-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="objetivo_principal">Objetivo principal</label>
+                <div class="select-wrap">
+                  <select id="objetivo_principal" name="objetivo_principal" required></select>
+                  <svg class="select-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- PASO 2 -->
+            <div class="form-section">
+              <div class="section-label">
+                <span class="step-chip">2</span>
+                <span>Tus intereses</span>
+              </div>
+
+              <div class="field">
+                <div class="field-label-row">
+                  <span class="field-label">Areas de interes</span>
+                  <span id="areas-counter" class="counter-badge">0 / 3</span>
+                </div>
+                <p class="field-hint">Elige hasta 3 opciones</p>
+                <div id="areas-interes" class="chip-grid" role="group" aria-label="Areas de interes"></div>
+              </div>
+
+              <div class="field">
+                <span class="field-label">Experiencia o fortalezas</span>
+                <p class="field-hint">Selecciona las que apliquen</p>
+                <div id="fortalezas" class="chip-grid" role="group" aria-label="Fortalezas"></div>
+              </div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- PASO 3 -->
+            <div class="form-section">
+              <div class="section-label">
+                <span class="step-chip">3</span>
+                <span>Disponibilidad</span>
+              </div>
+
+              <div class="field">
+                <span class="field-label">Modalidad posible</span>
+                <div id="modalidad-preferida" class="chip-grid chip-grid--sm" role="group" aria-label="Modalidad preferida"></div>
+              </div>
+
+              <div class="field-row">
+                <div class="field">
+                  <label class="field-label" for="tiempo_semana">Horas por semana</label>
+                  <div class="select-wrap">
+                    <select id="tiempo_semana" name="tiempo_semana" required></select>
+                    <svg class="select-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="plazo_preferido">Plazo para terminar</label>
+                  <div class="select-wrap">
+                    <select id="plazo_preferido" name="plazo_preferido" required></select>
+                    <svg class="select-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="zona">Zona donde podrias estudiar</label>
+                <div class="select-wrap">
+                  <select id="zona" name="zona" required></select>
+                  <svg class="select-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- PASO 4 -->
+            <div class="form-section">
+              <div class="section-label">
+                <span class="step-chip">4</span>
+                <span>Prioridades</span>
+              </div>
+
+              <div class="field">
+                <div class="range-header">
+                  <label class="field-label" for="importancia_rapidez">Que tan importante es terminar rapido?</label>
+                  <span id="rapidez-val" class="range-val">3</span>
+                </div>
+                <input
+                  id="importancia_rapidez"
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  name="importancia_rapidez"
+                  value="3"
+                />
+                <div class="range-labels">
+                  <span>No tanto</span>
+                  <span>Muy importante</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="range-header">
+                  <label class="field-label" for="importancia_empleabilidad">Que tan importante es mejorar oportunidades laborales?</label>
+                  <span id="empleabilidad-val" class="range-val">3</span>
+                </div>
+                <input
+                  id="importancia_empleabilidad"
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  name="importancia_empleabilidad"
+                  value="3"
+                />
+                <div class="range-labels">
+                  <span>No tanto</span>
+                  <span>Muy importante</span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="comentario">Algo mas que quieras agregar? <span class="optional">(opcional)</span></label>
+                <textarea
+                  id="comentario"
+                  name="comentario"
+                  rows="3"
+                  maxlength="500"
+                  placeholder="Ej: necesito estudiar de noche, no tengo experiencia en tecnologia..."
+                ></textarea>
+                <div class="char-count"><span id="char-count">0</span> / 500</div>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-area">
+              <div id="form-error" class="form-error" hidden></div>
+              <button id="submit-btn" type="submit" class="cta-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                Ver opciones recomendadas
+              </button>
+            </div>
+
+          </form>
+        </section>
+
+        <!-- LOADING -->
+        <div id="loading-state" class="loading-state" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Revisando opciones aprobadas del FPE...</p>
+        </div>
+
+        <!-- RESULTADOS -->
+        <section id="resultados" aria-live="polite"></section>
+
+        <!-- DISCLAIMER -->
+        <footer class="disclaimer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          El FPE es una ayuda para estudiar, mejorar el empleo y fortalecer la autosuficiencia.
+          Esta herramienta es solo una guia inicial. Antes de decidir, confirme los detalles en
+          el portal oficial del FPE, consulte con la institucion educativa y converse con su
+          obispo o presidente de rama.
+        </footer>
+
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
