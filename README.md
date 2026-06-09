@@ -10,13 +10,13 @@ pnpm install
 
 ## Configurar
 
-Copiar `.env.example` a `.env` y agregar `GEMINI_API_KEY`.
+Copiar `.env.example` a `.env` y agregar `AI_API_KEY`.
 
 ```bash
 cp .env.example .env
 ```
 
-Obtener una clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey).
+Obtener una clave gratuita en [Groq Console](https://console.groq.com/keys). El modelo por defecto es `llama-3.3-70b-versatile`.
 
 ## Ejecutar
 
@@ -32,7 +32,7 @@ pnpm run build
 
 ## Desplegar
 
-Subir a Vercel y configurar `GEMINI_API_KEY` en Environment Variables.
+Subir a Vercel y configurar `AI_API_KEY` en Environment Variables. Opcionalmente `AI_MODEL` para cambiar el modelo.
 
 ## Datos
 

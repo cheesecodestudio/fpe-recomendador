@@ -10,9 +10,9 @@
     "start": "vite --host 0.0.0.0"
   },
   "dependencies": {
-    "@google/genai": "^2.8.0",
     "@vitejs/plugin-legacy": "^5.4.3",
     "csv-parse": "^6.2.1",
+    "groq-sdk": "^1.2.1",
     "vite": "^5.4.11"
   }
 }

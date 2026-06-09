@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { GoogleGenAI, Type } from "@google/genai";
+import Groq from "groq-sdk";
 import { parse } from "csv-parse/sync";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile";
 
 const FALLBACK_RESPONSE = {
   resumen: "No encontramos una coincidencia suficientemente clara con tus respuestas.",
@@ -12,34 +12,19 @@ const FALLBACK_RESPONSE = {
     "Puedes ajustar tus preferencias o revisar directamente el portal oficial del FPE para confirmar opciones disponibles."
 };
 
-const recommendationSchema = {
-  type: Type.OBJECT,
-  properties: {
-    resumen: { type: Type.STRING },
-    recomendaciones: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          id: { type: Type.STRING },
-          por_que_encaja: { type: Type.STRING },
-          empleos_posibles: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
-          },
-          que_revisar: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING }
-          },
-          proximo_paso: { type: Type.STRING }
-        },
-        required: ["id", "por_que_encaja", "empleos_posibles", "que_revisar", "proximo_paso"]
-      }
-    },
-    nota_final: { type: Type.STRING }
-  },
-  required: ["resumen", "recomendaciones", "nota_final"]
-};
+const recommendationSchema = `{
+  "resumen": "string",
+  "recomendaciones": [
+    {
+      "id": "string",
+      "por_que_encaja": "string",
+      "empleos_posibles": ["string (1 a 4 items)"],
+      "que_revisar": ["string (1 a 4 items)"],
+      "proximo_paso": "string"
+    }
+  ],
+  "nota_final": "string"
+}`;
 
 function normalizeText(value) {
   return String(value || "")
@@ -215,11 +200,11 @@ function enrichRecommendation(item, careersById) {
 }
 
 async function requestAI(profile, candidates) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY no esta configurada en el backend.");
+  if (!process.env.AI_API_KEY) {
+    throw new Error("AI_API_KEY no esta configurada en el backend.");
   }
 
-  const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const client = new Groq({ apiKey: process.env.AI_API_KEY });
 
   const systemInstruction = `Eres un orientador educativo para adultos miembros de La Iglesia de Jesucristo de los Santos de los Ultimos Dias en Costa Rica que estan considerando opciones de estudio aprobadas por el Fondo Perpetuo para la Educacion.
 
@@ -235,7 +220,8 @@ Reglas obligatorias:
 7. No prometas empleo. Puedes decir "podria ayudar a prepararse para" o "podria orientarse hacia".
 8. Devuelve maximo 3 opciones.
 9. Para programa, institucion, ciudad, costo, duracion, modalidad, nivel y categoria, usa exactamente los datos de la lista candidata.
-10. Devuelve unicamente JSON valido segun el schema solicitado.`;
+10. Devuelve unicamente JSON valido con esta estructura exacta:
+${recommendationSchema}`;
 
   const userPrompt = `Perfil del participante:
 ${JSON.stringify(profile, null, 2)}
@@ -248,18 +234,17 @@ ${JSON.stringify(candidates.map(compactCareer), null, 2)}
 
 Recomienda maximo 3 opciones. Prioriza opciones realistas segun intereses, modalidad, duracion, zona, objetivo y fortalezas.`;
 
-  const response = await client.models.generateContent({
+  const completion = await client.chat.completions.create({
     model: MODEL,
-    contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-    config: {
-      systemInstruction,
-      temperature: 0.2,
-      responseMimeType: "application/json",
-      responseSchema: recommendationSchema
-    }
+    messages: [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: userPrompt }
+    ],
+    temperature: 0.2,
+    response_format: { type: "json_object" }
   });
 
-  const text = response.text || "{}";
+  const text = completion.choices[0]?.message?.content || "{}";
   return JSON.parse(text);
 }
 
