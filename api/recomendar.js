@@ -275,9 +275,6 @@ ${JSON.stringify(candidates.map(compactCareer), null, 2)}
 
 Recomienda maximo 3 opciones. Prioriza opciones realistas segun intereses, modalidad, duracion, zona, objetivo y fortalezas.`;
 
-  console.log("AI system instruction:", systemInstruction);
-  console.log("AI user prompt:", userPrompt);
-
   const completion = await client.chat.completions.create({
     model: MODEL,
     messages: [
@@ -288,7 +285,7 @@ Recomienda maximo 3 opciones. Prioriza opciones realistas segun intereses, modal
     response_format: { type: "json_object" },
   });
 
-  console.log("AI raw response:", completion);
+  console.log("AI raw response:", completion.choices[0]?.message);
 
   const text = completion.choices[0]?.message?.content || "{}";
   return JSON.parse(text);
