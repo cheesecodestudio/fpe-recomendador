@@ -6,10 +6,11 @@ import { parse } from "csv-parse/sync";
 const MODEL = process.env.AI_MODEL || "llama-3.3-70b-versatile";
 
 const FALLBACK_RESPONSE = {
-  resumen: "No encontramos una coincidencia suficientemente clara con tus respuestas.",
+  resumen:
+    "No encontramos una coincidencia suficientemente clara con tus respuestas.",
   recomendaciones: [],
   nota_final:
-    "Puedes ajustar tus preferencias o revisar directamente el portal oficial del FPE para confirmar opciones disponibles."
+    "Puedes ajustar tus preferencias o revisar directamente el portal oficial del FPE para confirmar opciones disponibles.",
 };
 
 const recommendationSchema = `{
@@ -35,28 +36,44 @@ function normalizeText(value) {
 }
 
 function loadCareers() {
-  const csvPath = path.join(process.cwd(), "data", "fpe_carreras_costa_rica_2026.csv");
+  const csvPath = path.join(
+    process.cwd(),
+    "data",
+    "fpe_carreras_costa_rica_2026.csv",
+  );
   const csv = fs.readFileSync(csvPath, "utf8");
   return parse(csv, { columns: true, skip_empty_lines: true, trim: true });
 }
 
 function validateProfile(payload) {
   const safe = payload && typeof payload === "object" ? payload : {};
-  const areas = Array.isArray(safe.areas_interes) ? safe.areas_interes.slice(0, 3) : [];
-  const modalidades = Array.isArray(safe.modalidad_preferida) ? safe.modalidad_preferida.slice(0, 4) : [];
+  const areas = Array.isArray(safe.areas_interes)
+    ? safe.areas_interes.slice(0, 3)
+    : [];
+  const modalidades = Array.isArray(safe.modalidad_preferida)
+    ? safe.modalidad_preferida.slice(0, 4)
+    : [];
 
   return {
     situacion_actual: String(safe.situacion_actual || ""),
     objetivo_principal: String(safe.objetivo_principal || ""),
     areas_interes: areas.map((x) => String(x)),
-    fortalezas: Array.isArray(safe.fortalezas) ? safe.fortalezas.map((x) => String(x)).slice(0, 12) : [],
+    fortalezas: Array.isArray(safe.fortalezas)
+      ? safe.fortalezas.map((x) => String(x)).slice(0, 12)
+      : [],
     modalidad_preferida: modalidades.map((x) => String(x)),
     tiempo_semana: String(safe.tiempo_semana || ""),
     plazo_preferido: String(safe.plazo_preferido || ""),
     zona: String(safe.zona || ""),
-    importancia_rapidez: Math.min(5, Math.max(1, Number(safe.importancia_rapidez || 3))),
-    importancia_empleabilidad: Math.min(5, Math.max(1, Number(safe.importancia_empleabilidad || 3))),
-    comentario: String(safe.comentario || "").slice(0, 500)
+    importancia_rapidez: Math.min(
+      5,
+      Math.max(1, Number(safe.importancia_rapidez || 3)),
+    ),
+    importancia_empleabilidad: Math.min(
+      5,
+      Math.max(1, Number(safe.importancia_empleabilidad || 3)),
+    ),
+    comentario: String(safe.comentario || "").slice(0, 500),
   };
 }
 
@@ -78,9 +95,16 @@ function modalityMatches(userModalities, careerModality) {
 
   return selected.some((item) => {
     const m = normalizeText(item);
-    if (m === "presencial") return modality.includes("presencial") || modality.includes("in-person");
-    if (m === "hibrida") return modality.includes("hibrid") || modality.includes("mixta");
-    if (m === "en linea") return modality.includes("online") || modality.includes("linea") || modality.includes("virtual");
+    if (m === "presencial")
+      return modality.includes("presencial") || modality.includes("in-person");
+    if (m === "hibrida")
+      return modality.includes("hibrid") || modality.includes("mixta");
+    if (m === "en linea")
+      return (
+        modality.includes("online") ||
+        modality.includes("linea") ||
+        modality.includes("virtual")
+      );
     return false;
   });
 }
@@ -91,28 +115,34 @@ function cityMatches(userZone, careerCity, careerModality) {
   const modality = normalizeText(careerModality);
   if (!zone || zone.includes("cualquier")) return true;
   if (zone.includes("en linea")) {
-    return modality.includes("online") || modality.includes("linea") || modality.includes("virtual");
+    return (
+      modality.includes("online") ||
+      modality.includes("linea") ||
+      modality.includes("virtual")
+    );
   }
   return city.includes(zone);
 }
 
 function matchesEmployabilityArea(searchable) {
   return /tecnologia|software|datos|data|ciberseguridad|salud|idiomas|ingles|administracion|contabilidad|mecanica|refrigeracion|oficios/.test(
-    searchable
+    searchable,
   );
 }
 
 function scoreCareer(career, profile) {
   let score = 0;
-  const searchable = normalizeText([
-    career.programa,
-    career.institucion,
-    career.ciudad,
-    career.modalidad,
-    career.nivel,
-    career.categoria,
-    career.etiquetas
-  ].join(" "));
+  const searchable = normalizeText(
+    [
+      career.programa,
+      career.institucion,
+      career.ciudad,
+      career.modalidad,
+      career.nivel,
+      career.categoria,
+      career.etiquetas,
+    ].join(" "),
+  );
 
   for (const interest of profile.areas_interes) {
     const ni = normalizeText(interest);
@@ -121,23 +151,32 @@ function scoreCareer(career, profile) {
     if (searchable.includes(ni)) score += 4;
   }
 
-  if (modalityMatches(profile.modalidad_preferida, career.modalidad)) score += 3;
+  if (modalityMatches(profile.modalidad_preferida, career.modalidad))
+    score += 3;
   if (cityMatches(profile.zona, career.ciudad, career.modalidad)) score += 3;
-  if (durationMatches(profile.plazo_preferido, career.duracion_meses)) score += 2;
+  if (durationMatches(profile.plazo_preferido, career.duracion_meses))
+    score += 2;
 
   const objetivo = normalizeText(profile.objetivo_principal);
   const nivel = normalizeText(career.nivel);
   const months = Number(career.duracion_meses || 0);
 
-  if (objetivo.includes("empleo mas rapido") && months > 0 && months <= 18) score += 2;
-  if (objetivo.includes("carrera tecnica") && nivel.includes("tecnico")) score += 2;
-  if (objetivo.includes("titulo universitario") && (nivel.includes("bachillerato") || nivel.includes("licenciatura"))) score += 2;
+  if (objetivo.includes("empleo mas rapido") && months > 0 && months <= 18)
+    score += 2;
+  if (objetivo.includes("carrera tecnica") && nivel.includes("tecnico"))
+    score += 2;
+  if (
+    objetivo.includes("titulo universitario") &&
+    (nivel.includes("bachillerato") || nivel.includes("licenciatura"))
+  )
+    score += 2;
 
   const rapidez = Number(profile.importancia_rapidez || 3);
   if (rapidez >= 4 && months > 0 && months <= 18) score += 1 + (rapidez - 3);
 
   const empleabilidad = Number(profile.importancia_empleabilidad || 3);
-  if (empleabilidad >= 4 && matchesEmployabilityArea(searchable)) score += 1 + (empleabilidad - 3);
+  if (empleabilidad >= 4 && matchesEmployabilityArea(searchable))
+    score += 1 + (empleabilidad - 3);
 
   return score;
 }
@@ -153,7 +192,7 @@ function compactCareer(career) {
     career.modalidad,
     career.nivel,
     career.categoria,
-    career.etiquetas
+    career.etiquetas,
   ];
 }
 
@@ -193,9 +232,11 @@ function enrichRecommendation(item, careersById) {
     nivel: career.nivel,
     categoria: career.categoria,
     por_que_encaja: item.por_que_encaja,
-    empleos_posibles: Array.isArray(item.empleos_posibles) ? item.empleos_posibles : [],
+    empleos_posibles: Array.isArray(item.empleos_posibles)
+      ? item.empleos_posibles
+      : [],
     que_revisar: Array.isArray(item.que_revisar) ? item.que_revisar : [],
-    proximo_paso: item.proximo_paso
+    proximo_paso: item.proximo_paso,
   };
 }
 
@@ -234,15 +275,19 @@ ${JSON.stringify(candidates.map(compactCareer), null, 2)}
 
 Recomienda maximo 3 opciones. Prioriza opciones realistas segun intereses, modalidad, duracion, zona, objetivo y fortalezas.`;
 
+  console.log("AI system instruction:", systemInstruction);
+
   const completion = await client.chat.completions.create({
     model: MODEL,
     messages: [
       { role: "system", content: systemInstruction },
-      { role: "user", content: userPrompt }
+      { role: "user", content: userPrompt },
     ],
     temperature: 0.2,
-    response_format: { type: "json_object" }
+    response_format: { type: "json_object" },
   });
+
+  console.log("AI raw response:", completion);
 
   const text = completion.choices[0]?.message?.content || "{}";
   return JSON.parse(text);
@@ -260,7 +305,6 @@ export default async function handler(req, res) {
     const candidateIds = new Set(candidates.map((c) => c.id));
     const careersById = new Map(careers.map((c) => [c.id, c]));
 
-    console.log(careers);
     if (!candidates.length) {
       return res.status(200).json(FALLBACK_RESPONSE);
     }
@@ -282,12 +326,12 @@ export default async function handler(req, res) {
       recomendaciones,
       nota_final:
         String(ai.nota_final || "") ||
-        "Confirma siempre programa, costo, requisitos y disponibilidad en el portal oficial del FPE, con la institucion educativa y con tu obispo o presidente de rama."
+        "Confirma siempre programa, costo, requisitos y disponibilidad en el portal oficial del FPE, con la institucion educativa y con tu obispo o presidente de rama.",
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      error: "No se pudo generar la recomendacion. Intenta nuevamente."
+      error: "No se pudo generar la recomendacion. Intenta nuevamente.",
     });
   }
 }
