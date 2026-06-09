@@ -4,7 +4,7 @@ import "./styles.css";
 // Cambia a false para usar el backend real
 const DUMMY_MODE = false;
 
-const DUMMY_RESPONSE = {
+const DUMMY_RESPONSE = import.meta.env.DEV ? {
   resumen: "Se han encontrado opciones de estudio que se ajustan a tus intereses y objetivos.",
   recomendaciones: [
     {
@@ -60,7 +60,7 @@ const DUMMY_RESPONSE = {
     }
   ],
   nota_final: "Recuerda que es importante investigar más sobre cada opción y considerar tus objetivos y fortalezas antes de tomar una decisión."
-};
+} : null;
 
 /* ─── OPCIONES ───────────────────────────────────────────────── */
 const OPTIONS = {
@@ -136,14 +136,15 @@ const OPTIONS = {
 };
 
 /* ─── REFS ───────────────────────────────────────────────────── */
-const form          = document.querySelector("#recomendador-form");
-const submitBtn     = document.querySelector("#submit-btn");
-const loadingState  = document.querySelector("#loading-state");
-const resultsNode   = document.querySelector("#resultados");
-const formError     = document.querySelector("#form-error");
-const areasCounter  = document.querySelector("#areas-counter");
-const charCount     = document.querySelector("#char-count");
-const rapidezVal    = document.querySelector("#rapidez-val");
+const form             = document.querySelector("#recomendador-form");
+const submitBtn        = document.querySelector("#submit-btn");
+const loadingState     = document.querySelector("#loading-state");
+const resultsNode      = document.querySelector("#resultados");
+const formError        = document.querySelector("#form-error");
+const areasCounter     = document.querySelector("#areas-counter");
+const charCountEl      = document.querySelector("#char-count");
+const charMaxEl        = document.querySelector("#char-max");
+const rapidezVal       = document.querySelector("#rapidez-val");
 const empleabilidadVal = document.querySelector("#empleabilidad-val");
 
 /* ─── HELPERS ────────────────────────────────────────────────── */
@@ -156,7 +157,12 @@ function escapeHtml(text) {
     .replaceAll("'", "&#39;");
 }
 
+function scrollTo(el, block = "start") {
+  el.scrollIntoView({ behavior: "smooth", block });
+}
+
 const CHECK_ICON_SVG = `<svg class="chip-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+const INFO_ICON_SVG  = `<svg width="16" height="16" aria-hidden="true"><use href="#icon-info"/></svg>`;
 
 /* ─── FILL SELECTS ───────────────────────────────────────────── */
 function fillSelect(name, values) {
@@ -207,8 +213,7 @@ function updateAreasState() {
 
   if (areasCounter) {
     areasCounter.textContent = `${checked.length} / 3`;
-    areasCounter.style.background = full ? "var(--primary)" : "var(--primary-lt)";
-    areasCounter.style.color = full ? "#fff" : "var(--primary)";
+    areasCounter.classList.toggle("counter-badge--full", full);
   }
 }
 
@@ -245,11 +250,13 @@ function bindRange(inputName, displayEl) {
 /* ─── CHAR COUNT ─────────────────────────────────────────────── */
 function bindCharCount() {
   const textarea = form.elements.namedItem("comentario");
-  if (!textarea || !charCount) return;
+  if (!textarea || !charCountEl) return;
+  const max = textarea.maxLength > 0 ? textarea.maxLength : 500;
+  if (charMaxEl) charMaxEl.textContent = max;
   textarea.addEventListener("input", () => {
     const len = textarea.value.length;
-    charCount.textContent = len;
-    charCount.style.color = len > 450 ? "var(--danger)" : "var(--subtle)";
+    charCountEl.textContent = len;
+    charCountEl.style.color = len > max * 0.9 ? "var(--danger)" : "var(--subtle)";
   });
 }
 
@@ -257,8 +264,8 @@ function bindCharCount() {
 function showFormError(message) {
   if (!formError) return;
   formError.hidden = false;
-  formError.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${escapeHtml(message)}`;
-  formError.scrollIntoView({ behavior: "smooth", block: "center" });
+  formError.innerHTML = `${INFO_ICON_SVG} ${escapeHtml(message)}`;
+  scrollTo(formError, "center");
 }
 
 function clearFormError() {
@@ -286,10 +293,9 @@ function readForm() {
 
 /* ─── VALIDATE ───────────────────────────────────────────────── */
 function validatePayload(payload) {
-  if (!payload.areas_interes.length)      return "Selecciona al menos un area de interes.";
-  if (payload.areas_interes.length > 3)   return "Solo se permiten hasta 3 areas de interes.";
+  if (!payload.areas_interes.length)       return "Selecciona al menos un area de interes.";
+  if (payload.areas_interes.length > 3)    return "Solo se permiten hasta 3 areas de interes.";
   if (!payload.modalidad_preferida.length) return "Selecciona al menos una modalidad posible.";
-  if (payload.comentario.length > 500)    return "El comentario supera los 500 caracteres.";
   return "";
 }
 
@@ -311,7 +317,7 @@ function renderResults(payload) {
       ${summaryHtml}
       <div class="result-empty"><p>${escapeHtml(FALLBACK_EMPTY)}</p></div>
     `;
-    resultsNode.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollTo(resultsNode);
     return;
   }
 
@@ -384,13 +390,13 @@ function renderResults(payload) {
   `;
 
   resultsNode.innerHTML = summaryHtml + cardsHtml + disclaimerHtml;
-  resultsNode.scrollIntoView({ behavior: "smooth", block: "start" });
+  scrollTo(resultsNode);
 }
 
 /* ─── RENDER ERROR ───────────────────────────────────────────── */
 function renderError(message) {
   resultsNode.innerHTML = `<div class="result-error">${escapeHtml(message)}</div>`;
-  resultsNode.scrollIntoView({ behavior: "smooth", block: "start" });
+  scrollTo(resultsNode);
 }
 
 /* ─── SUBMIT ─────────────────────────────────────────────────── */
