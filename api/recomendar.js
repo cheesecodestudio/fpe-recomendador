@@ -285,8 +285,6 @@ Recomienda maximo 3 opciones. Prioriza opciones realistas segun intereses, modal
     response_format: { type: "json_object" },
   });
 
-  console.log("AI raw response:", completion.choices[0]?.message);
-
   const text = completion.choices[0]?.message?.content || "{}";
   return JSON.parse(text);
 }
