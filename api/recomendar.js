@@ -260,6 +260,7 @@ export default async function handler(req, res) {
     const candidateIds = new Set(candidates.map((c) => c.id));
     const careersById = new Map(careers.map((c) => [c.id, c]));
 
+    console.log(careers);
     if (!candidates.length) {
       return res.status(200).json(FALLBACK_RESPONSE);
     }
