@@ -12,7 +12,7 @@
   "dependencies": {
     "@google/genai": "^2.8.0",
     "@vitejs/plugin-legacy": "^5.4.3",
-    "csv-parse": "latest",
+    "csv-parse": "^6.2.1",
     "vite": "^5.4.11"
   }
 }
