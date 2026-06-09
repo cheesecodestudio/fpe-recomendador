@@ -43,11 +43,6 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.55;
-  min-height: 100dvh;
-}
-
-/* ─── APP SHELL ──────────────────────────────────────────────── */
-.app {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -487,6 +482,10 @@ textarea:focus {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── RESULT CARDS ───────────────────────────────────────────── */
+.results {
+  display: contents;
+}
+
 .result-summary {
   background: var(--surface);
   border-radius: var(--radius-lg);
@@ -681,8 +680,6 @@ textarea:focus {
   align-items: flex-start;
   padding: 1rem 1.25rem;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
   font-size: .82rem;
   color: var(--muted);
   line-height: 1.55;

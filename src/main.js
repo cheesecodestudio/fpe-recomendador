@@ -1,5 +1,67 @@
 import "./styles.css";
 
+/* ─── DUMMY MODE ─────────────────────────────────────────────── */
+// Cambia a false para usar el backend real
+const DUMMY_MODE = true;
+
+const DUMMY_RESPONSE = {
+  resumen: "Se han encontrado opciones de estudio que se ajustan a tus intereses y objetivos.",
+  recomendaciones: [
+    {
+      id: "FPE-CR-041",
+      programa: "Técnico en Desarrollo de Software",
+      institucion: "Universidad CENFOTEC",
+      ciudad: "San José",
+      costo_colones: 4223000,
+      costo_texto: "₡4.223.000",
+      duracion_meses: 16,
+      duracion_texto: "16 meses",
+      modalidad: "Presencial",
+      nivel: "Técnico",
+      categoria: "Tecnología",
+      por_que_encaja: "Se ajusta a tus intereses en tecnología y desarrollo de software, y puede ayudar a prepararte para un mejor empleo en el área.",
+      empleos_posibles: ["Desarrollador de software", "Analista de sistemas", "Ingeniero de software"],
+      que_revisar: ["Requisitos de admisión", "Plan de estudios", "Costos y financiamiento"],
+      proximo_paso: "Investigar más sobre la Universidad CENFOTEC y su programa de Técnico en Desarrollo de Software"
+    },
+    {
+      id: "FPE-CR-042",
+      programa: "Técnico en Data Analyst",
+      institucion: "Universidad CENFOTEC",
+      ciudad: "San José",
+      costo_colones: 6222149,
+      costo_texto: "₡6.222.149",
+      duracion_meses: 12,
+      duracion_texto: "12 meses",
+      modalidad: "En línea",
+      nivel: "Técnico",
+      categoria: "Tecnología",
+      por_que_encaja: "Se ajusta a tus intereses en análisis de datos y tecnología, y puede ayudar a prepararte para un mejor empleo en el área.",
+      empleos_posibles: ["Analista de datos", "Científico de datos", "Especialista en inteligencia de negocios"],
+      que_revisar: ["Requisitos de admisión", "Plan de estudios", "Costos y financiamiento"],
+      proximo_paso: "Investigar más sobre la Universidad CENFOTEC y su programa de Técnico en Data Analyst"
+    },
+    {
+      id: "FPE-CR-043",
+      programa: "Licenciatura en Ingeniería en Sistemas de Computación",
+      institucion: "Universidad Fidelitas S.A",
+      ciudad: "San José",
+      costo_colones: 9628000,
+      costo_texto: "₡9.628.000",
+      duracion_meses: 12,
+      duracion_texto: "12 meses",
+      modalidad: "En línea",
+      nivel: "Licenciatura",
+      categoria: "Tecnología",
+      por_que_encaja: "Se ajusta a tus intereses en tecnología y desarrollo de software, y puede ayudar a prepararte para un mejor empleo en el área.",
+      empleos_posibles: ["Desarrollador de software", "Analista de sistemas", "Ingeniero de software"],
+      que_revisar: ["Requisitos de admisión", "Plan de estudios", "Costos y financiamiento"],
+      proximo_paso: "Investigar más sobre la Universidad Fidelitas S.A y su programa de Licenciatura en Ingeniería en Sistemas de Computación"
+    }
+  ],
+  nota_final: "Recuerda que es importante investigar más sobre cada opción y considerar tus objetivos y fortalezas antes de tomar una decisión."
+};
+
 /* ─── OPCIONES ───────────────────────────────────────────────── */
 const OPTIONS = {
   situacion_actual: [
@@ -349,15 +411,22 @@ async function onSubmit(event) {
   loadingState.scrollIntoView({ behavior: "smooth", block: "center" });
 
   try {
-    const response = await fetch("/api/recomendar", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(payload)
-    });
+    let result;
 
-    if (!response.ok) throw new Error("No se pudieron generar recomendaciones en este momento.");
+    if (DUMMY_MODE) {
+      await new Promise((r) => setTimeout(r, 800)); // simula latencia
+      result = DUMMY_RESPONSE;
+    } else {
+      const response = await fetch("/api/recomendar", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload)
+      });
 
-    const result = await response.json();
+      if (!response.ok) throw new Error("No se pudieron generar recomendaciones en este momento.");
+      result = await response.json();
+    }
+
     renderResults(result);
   } catch (err) {
     renderError(err?.message || "Ocurrio un error inesperado.");
